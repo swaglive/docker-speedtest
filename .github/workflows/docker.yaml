@@ -5,6 +5,9 @@ on:
     branches:
     - master
 
+env:
+  PLATFORMS: linux/amd64,linux/arm64
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,14 +19,17 @@ jobs:
       fail-fast: false
       matrix:
         version:
-        - ""
+        - "5.3.0"
         include:
-        - version: ""
+        - version: "5.3.0"
           latest: true
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        repository: librespeed/speedtest
+        ref: ${{ matrix.version }}
 
     - name: Configure
       id: config
@@ -79,7 +85,7 @@ jobs:
         build-args: |
           version=${{ matrix.version }}
         push: true
-        platforms: ${{ steps.qemu.outputs.platforms }}
+        platforms: ${{ matrix.platforms || env.PLATFORMS || 'linux/amd64' }}
         labels: ${{ steps.meta.outputs.labels }}
         tags: ${{ steps.meta.outputs.tags }}
         cache-from: type=gha
